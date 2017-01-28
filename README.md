@@ -18,7 +18,7 @@ If you want to play the game, here are the instructions:
 
 2. Clone or download the repo.
 
-3. Open the "builds" folder.
+3. Open the "rel" folder.
 
 4. Open a command prompt or terminal and run the command: "java -jar (latest version).jar"
 
