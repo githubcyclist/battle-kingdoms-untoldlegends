@@ -1,0 +1,130 @@
+Battle Kingdoms: Untold Legends
+
+This game will be extremely complex and I need to think it through.
+
+***WHEN THE GAME STARTS***
+
+If this is the first time that the player has started the game, a folder called "local-config" will be created (if it doesn't already exist), and then this will be displayed:
+
+~~~Battle Kingdoms: Untold Legends~~~
+It looks like this is your first time playing.
+Please enter the path to your file sync folder:
+
+The game will then look for a directory called "battlekingdoms-data" in the given sync folder. If it doesn't exist, then the game will prompt the user:
+
+Could not find a game data folder at that location. Would you like to create it? [y]es or [n]o
+
+If the user says yes, then a game data folder will be created. Otherwise, the game will prompt the user again:
+
+Please enter a path to a different file sync folder:
+
+If the user says no again, then this will continue in an endless loop until the user either specifies a folder with a game data folder or agrees to create a new one.
+
+If the user enters a sync folder without a game data folder, once an empty game data folder is created, this message will be displayed:
+
+Congrats! You have just created an empty game data folder. This folder contains no servers. Would you like to create a new server? [y]es or [n]o
+
+If the user says yes, then this prompt will be displayed:
+
+What should the server be called?
+
+After the server name has been entered, this message will be displayed:
+
+Hooray! A new server, <server name>, has been created!
+
+And then this one:
+
+You need to set a display name to play on this server. Enter it here:
+
+And then gameplay will start.
+
+*    *    *
+
+If the user has already gone through the setup process, then a server list will be displayed, e.g.:
+
+~~~Battle Kingdoms: Untold Legends~~~
+Welcome back, <display name>!
+Servers:
+1. First server
+2. Second server
+3. Third server
+
+Choose one to play on by its number above:
+
+Once the user has selected a server to play on, gameplay begins.
+
+***GAMEPLAY***
+
+~~Structures~~
+
+Gold Mine:
+ - Purpose: Get Gold.
+ - Efficency:
+   * Level 1 - 1 gold/sec
+   * Level 2 - 3 gold/sec
+   * Level 3 - 6 gold/sec
+   * Level 4 - 8 gold/sec
+   * Level 5 - 12 gold/sec
+ - Upgrade Cost:
+   * To Level 2 - 30 gold
+   * To Level 3 - 125 gold
+   * To Level 4 - 250 gold
+   * To Level 5 - 1,250 gold
+   * To Level 6 - 2,500 gold
+
+~~When You Start Out~~
+
+When the user first starts playing, they will be greeted with this screen:
+
+Welcome! You start with:
+500 Gold
+A Level 1 Gold Mine to get more gold
+
+~~Attacking - Beat Your Friends!~~
+
+The key "a" opens the attack menu.
+This is what the attack menu looks like:
+
+~~ATTACK!!!~~
+Users you can attack:
+(all users on the server except you)
+
+Fighters needed to attack: <amount of fighters>/3
+If you don't have enough fighters to attack, it will say "Get more Fighters and try again" here.
+
+If you do have enough fighters to attack, it will display this:
+
+Choose a user to attack, or press <q> to quit: 
+
+If the user presses q, then the program will exit the attack menu.
+If not, then the program will validate if the given user exists.
+If the user exists, then the program will create a file called "Warfile.tmp".
+This file will contain your display name, and the target computer will recieve this notification:
+
+<your display name> has declared war on you!
+
+
+
+
+~~Alliances - Crush Your Enemies!~~
+
+In the server console, the key "l" should be used to open the alliance menu.
+It should look something like this:
+
+~~Alliance Menu~~
+You are allied with:
+friendlybear13
+All users on the server:
+evilvillain45
+friendlybear13
+neutralfox63
+extravagantduck89
+<c> to create an alliance,
+<r> to remove one (use sparingly!) and
+<g> to give gold to allies
+Type your command >
+
+
+
+
+
