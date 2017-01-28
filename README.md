@@ -8,6 +8,8 @@ Some examples of file syncing software:
 - Google Drive
 - Box
 
+Remember, if you are playing with friends who already use your file syncing software of choice, shared folders can be used.
+
 ## Play it!
 
 If you want to play the game, here are the instructions:
@@ -20,7 +22,7 @@ If you want to play the game, here are the instructions:
 
 4. Open a command prompt or terminal and run the command: "java -jar (latest version).jar"
 
-5. Make sure you create or join a group which is in 
+5. Make sure you create or join a group which is in a folder that is being synced to other computers.
 
 ## Work on it!
 To develop the game, first make sure you have Java installed, and not just the JRE, also the JDK (which I'm sure you do).
