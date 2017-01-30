@@ -77,7 +77,7 @@ public class BKULCustomConsole {
 			        i++;
 			    }
 			} catch (Exception e) {
-				System.out.print("Could not load group name. Error details:");
+				System.out.print("Could not load group name. Details of error:");
 				System.out.print(e.getMessage());
 			}
 			System.out.println("<j> to join a server, <h> for help, and <o> for options.");
