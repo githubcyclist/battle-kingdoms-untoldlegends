@@ -10,7 +10,7 @@ Some examples of file syncing software:
 
 Remember, if you are playing with friends who already use your file syncing software of choice, shared folders can be used.
 
-## How to play the game
+## How to set up the game
 
 If you want to play the game, here are the instructions:
 
@@ -34,10 +34,12 @@ JFrame-based
 - Has more bugs, e.g. text in "console" is eraseable...
 
 ### Instructions for the terminal-based version
-4. Open a command prompt or terminal and run the command: "java -jar bkul-text-(latest version).jar"
+Open a command prompt or terminal and run the command: "java -jar bkul-text-(latest version).jar"
 
 ### Instructions for the JFrame-based version
-4. On most systems, you can just double-click the jar file.
+On most systems, you can just double-click the jar file.
+If yours doesn't, then we can use a almost identical procedure to the above:
+Open a command prompt or terminal and run the command: "java -jar bkul-customconsole-(latest version).jar"
 
 ------------------------------------------------------------------------------------------------------------------------------
 
