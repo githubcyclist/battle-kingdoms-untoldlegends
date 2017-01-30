@@ -30,6 +30,7 @@ Terminal-based
 
 JFrame-based
 - Based on the JFrame and a text box
+- Uses 100% cross-platform compatible console clearing
 - Text is eraseable...
 
 ### Instructions for the terminal-based version
