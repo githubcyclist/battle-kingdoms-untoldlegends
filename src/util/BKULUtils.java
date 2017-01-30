@@ -1,4 +1,4 @@
-package game;
+package util;
 
 import java.awt.AWTException;
 import java.awt.Robot;

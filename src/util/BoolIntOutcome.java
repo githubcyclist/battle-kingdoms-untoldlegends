@@ -1,4 +1,4 @@
-package game;
+package util;
 
 public class BoolIntOutcome {
 	public boolean bool;

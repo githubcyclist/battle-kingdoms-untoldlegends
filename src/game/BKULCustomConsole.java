@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Font;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Arrays;
@@ -8,9 +9,14 @@ import java.util.Scanner;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+import javaConsole.BKULConsole;
+import menu.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import util.BKULUtils;
+import util.BoolIntOutcome;
+import client.*;
 
-public class BKUL {
+public class BKULCustomConsole {
 	
 	// declare necessary variables
 	public static final String LOCAL_CONFIG_PATH = BKULUtils.getCurrentWorkingDir() + File.separator + "local-config";
@@ -18,38 +24,40 @@ public class BKUL {
 	public static String userDataPath;
 	public static String displayName;
 	public static Scanner userInputScanner = new Scanner(System.in);
+	public static BKULConsole bkulConsole = new BKULConsole();
 	
 	// main method, contains setup logic and game startup console
 	public static void main(String[] args) throws Exception {
-		BKULUtils.clearScreen();
-		printANSIColor("~~Battle Kingdoms: Untold Legends~~", ANSI_CYAN);
+		bkulConsole.setTitle("Battle Kingdoms: Untold Legends");
+		bkulConsole.setFont(new Font(Font.SANS_SERIF, 30, 20));
+		System.out.println("~~Battle Kingdoms: Untold Legends~~");
 		if(BKULUtils.doesDirectoryExist(LOCAL_CONFIG_PATH)) {
 			displayName = getFileFromLocalStorage("display-name.txt");
 			gameDataPath = getFileFromLocalStorage("sync-folder.txt");
-			printANSIColor("Welcome back, " + displayName + "!", ANSI_CYAN);
+			System.out.println("Welcome back, " + displayName + "!");
 			if(args.length != 0) {
 				if(args[0].equalsIgnoreCase("--join")) {
 					try {
 						joinServer(args[1]);
 					} catch(Exception e) {
-						printError("Could not join.");
-						printError(e.getMessage());
+						System.out.print("Could not join.");
+						System.out.print(e.getMessage());
 					}
 				} else if(args[0].equalsIgnoreCase("--delete-local-config")) {
-					printErrorRaw("Deleting the config folder " + LOCAL_CONFIG_PATH + ", press <enter> to continue or s to stop... ");
-					if(!userInputScanner.nextLine().equalsIgnoreCase("s")) {
+					System.out.print("Deleting the config folder " + LOCAL_CONFIG_PATH + ", press <enter> to continue or s to stop... ");
+					if(!InputGetter.nextLine().equalsIgnoreCase("s")) {
 						BKULUtils.deleteFileOrDirectory(LOCAL_CONFIG_PATH);
-					    printANSIColor("The config folder " + LOCAL_CONFIG_PATH + " has been successfully deleted.", ANSI_GREEN);
+					    System.out.println("The config folder " + LOCAL_CONFIG_PATH + " has been successfully deleted.");
 					} else {
-						printANSIColor("The folder was not deleted.", ANSI_GREEN);
+						System.out.println("The folder was not deleted.");
 					}
 				} else {
-					printError("Unrecognized command line argument.\n"
+					System.out.print("Unrecognized command line argument.\n"
 							+ "Usage:\n"
 							+ "--join <server name> - Join a server automagically!\n"
 							+ "--delete-local-config - Delete local configuration files");
 					System.out.print("Would you like to keep playing? [y]es or [n]o ");
-					if(userInputScanner.nextLine().equalsIgnoreCase("y")) {
+					if(InputGetter.nextLine().equalsIgnoreCase("y")) {
 						System.out.println("Continuing to server list...");
 					} else {
 						System.out.println("Goodbye.");
@@ -58,9 +66,9 @@ public class BKUL {
 				}
 			}
 			try {
-				printANSIColor("Connected to group " + BKULUtils.readFile(getGDPath("group-name.txt")), ANSI_GREEN);
+				System.out.println("Connected to group " + BKULUtils.readFile(ClientUtils.getUDPath("group-name.txt")));
 			    System.out.println("~~Servers~~");
-		    	File[] files = new File(getGDPath("servers")).listFiles();
+		    	File[] files = new File(ClientUtils.getUDPath("servers")).listFiles();
 		    	int i = 1;
 			    for (File file : files) {
 			        if (file.isDirectory()) {
@@ -69,54 +77,94 @@ public class BKUL {
 			        i++;
 			    }
 			} catch (Exception e) {
-				printError("Could not load group name. Error details:");
-				printError(e.getMessage());
+				System.out.print("Could not load group name. Error details:");
+				System.out.print(e.getMessage());
 			}
 			System.out.println("<j> to join a server, <h> for help, and <o> for options.");
-			boolean consoleMode = true;
-			while(consoleMode) {
-				System.out.print("lobby> ");
-				String consoleInput = userInputScanner.nextLine();
-				if(consoleInput.equalsIgnoreCase("h")) {
+			Menu lobbyMenu = new Menu(bkulConsole);
+			lobbyMenu.add("h", new MenuCallback() {
+				@Override
+				public void Invoke() {
 					System.out.println("~~HELP~~\n" +
-														"h - Display this screen\n" +
-														"c - Clear screen\n" +
-														"l - List servers\n" +
-														"j - Join server\n"+
-														"a - Add/create server\n" +
-														"o - Options\n" +
-														"q - Quit");
-				} else if(consoleInput.equalsIgnoreCase("c")) {
-					BKULUtils.clearScreen();
+							"h - Display this screen\n" +
+							"c - Clear screen\n" +
+							"l - List servers\n" +
+							"j - Join server\n"+
+							"a - Add/create server\n" +
+							"o - Options\n" +
+							"q - Quit");
+				}
+			});
+			lobbyMenu.add("c", new MenuCallback() {
+				@Override
+				public void Invoke() {
+					System.out.println("clearing screen");
+					bkulConsole.clear();
+				}
+			});
+			lobbyMenu.add("l", new MenuCallback() {
+				@Override
+				public void Invoke() {
+					System.out.println("~~Servers~~");
+			    	File[] files = new File(ClientUtils.getUDPath("servers")).listFiles();
+			    	int i = 1;
+				    for (File file : files) {
+				        if (file.isDirectory()) {
+				            System.out.println(i + ": " + file.getName());
+				        }
+				        i++;
+				    }
+				}
+			});
+			lobbyMenu.add("q", new MenuCallback() {
+				@Override
+				public void Invoke() {
+					System.out.println("Goodbye.");
+					System.exit(0);
+				}
+			});
+			lobbyMenu.add("j", new MenuCallback() {
+				@Override
+				public void Invoke() {
+					System.out.print("Enter the name of the server to join: ");
+					try {
+						joinServer(InputGetter.nextLine());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			boolean consoleOn = true;
+			while(consoleOn) {
+				System.out.print("lobby> ");
+				lobbyMenu.show();
+			}
+			/*
+			while(consoleMode) {
 				} else if(consoleInput.equalsIgnoreCase("a")) {
 					System.out.print("Please specify a name for the server, or <c> to cancel creation: ");
-					String serverNam = userInputScanner.nextLine();
+					String serverNam = InputGetter.nextLine();
 					if(!serverNam.equalsIgnoreCase("c")) {
 						String serverName = serverNam;
 						displayName = getFileFromLocalStorage("display-name.txt");
-						userDataPath = getGDPath("servers" + File.separator + serverName + File.separator + "users"
+						userDataPath = ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users"
 								+ File.separator + displayName);
-						BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName));
-						BKULUtils.createFile(getGDPath("servers" + File.separator + serverName + File.separator + "users.txt"));
-						BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName + File.separator + "users"));
-						BKULUtils.createFile(getLSPath(serverName, "Marketfile"));
-						BKULUtils.writeToFile("Fighter~300", getLSPath(currentServer, "Marketfile"));
+						BKULUtils.createDirectory(ClientUtils.getUDPath("servers" + File.separator + serverName));
+						BKULUtils.createFile(ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users.txt"));
+						BKULUtils.createDirectory(ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users"));
+						BKULUtils.createFile(ClientUtils.getLSPath(serverName, "Marketfile"));
+						BKULUtils.writeToFile("Fighter~300", ClientUtils.getLSPath(currentServer, "Marketfile"));
 						userSetup(serverName);
 						BKULUtils.appendFileNewLn(getFileFromLocalStorage("display-name.txt"),
-							getGDPath("servers" + File.separator + serverName + File.separator + "users.txt"));
-						printANSIColor("Server was created successfully!", ANSI_GREEN);
+							ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users.txt"));
+						System.out.println("Server was created successfully!");
 					}
-				} else if(consoleInput.equalsIgnoreCase("q")) {
-					System.out.println("Goodbye.");
-					System.exit(0);
-				} else if(consoleInput.equalsIgnoreCase("c")) {
-					
-				} else if(consoleInput.equalsIgnoreCase("j")) {
+		 		else if(consoleInput.equalsIgnoreCase("j")) {
 					System.out.print("Enter the name of the server to join: ");
-					joinServer(userInputScanner.nextLine());
+					joinServer(InputGetter.nextLine());
 				} else if(consoleInput.equalsIgnoreCase("l")) {
 					System.out.println("~~Servers~~");
-			    	File[] files = new File(getGDPath("servers")).listFiles();
+			    	File[] files = new File(ClientUtils.getUDPath("servers")).listFiles();
 			    	int i = 1;
 				    for (File file : files) {
 				        if (file.isDirectory()) {
@@ -125,9 +173,9 @@ public class BKUL {
 				        i++;
 				    }
 				} else {
-					printError("Command not found. Type <h> for a list of commands.");
+					System.out.print("Command not found. Type <h> for a list of commands.");
 				}
-			}
+			}*/
 		} else {
 			System.out.println("It looks like this is your first time playing. ");
 			boolean gameDataFolderFound = false;
@@ -135,25 +183,25 @@ public class BKUL {
 			String errorMessage = "";
 			while(!gameDataFolderFound) {
 				if(displayErr && !(errorMessage.equals(""))) {
-					printError(errorMessage);
+					System.out.print(errorMessage);
 					displayErr = false;
 				}
 				System.out.print("Please enter the path to a game data folder, or type q to quit> ");
-				String rawInput = userInputScanner.nextLine();
+				String rawInput = InputGetter.nextLine();
 				gameDataPath = rawInput + File.separator + "battlekingdoms-data";
 				if(!rawInput.equalsIgnoreCase("q")) {
 					if(BKULUtils.doesDirectoryExist(gameDataPath)) {
 						// found game data folder!
 						try {
-							printANSIColor("Yep, found a game data folder there!\n" +
-														 "The folder contains the group " + BKULUtils.readFile(getGDPath("group-name.txt")), ANSI_GREEN);
+							System.out.println("Yep, found a game data folder there!\n" +
+														 "The folder contains the group " + BKULUtils.readFile(ClientUtils.getUDPath("group-name.txt")));
 							System.out.print("Join this group? [y]es or [n]o ");
-							if(userInputScanner.nextLine().equalsIgnoreCase("y")) {
+							if(InputGetter.nextLine().equalsIgnoreCase("y")) {
 								BKULUtils.createDirectory(LOCAL_CONFIG_PATH);
 							    displayNamePrompt();
 								gameDataFolderFound = true;
 								writeToLocalStorage(gameDataPath, "sync-folder.txt");
-								printANSIColor("Setup is done! Exiting.", ANSI_GREEN);
+								System.out.println("Setup is done! Exiting.");
 								System.exit(0);
 							} else {
 								System.out.println("Please choose another folder:");
@@ -165,35 +213,35 @@ public class BKUL {
 					} else {
 						// didn't find folder :(
 						System.out.print("Could not find a game data folder at that location. Would you like to create it? [y]es or [n]o ");
-						if(userInputScanner.nextLine().equalsIgnoreCase("y")) {
+						if(InputGetter.nextLine().equalsIgnoreCase("y")) {
 							// the user said yes to creating a game data folder
 							if(!(BKULUtils.createDirectory(gameDataPath))) {
 								displayErr = true;
 								errorMessage = "There was a problem creating a game data folder at that location. Please try again with a different folder.";
 							} else {
-								printANSIColor("Congrats! A new game data folder was created at that location.", ANSI_GREEN);
-								printANSIColorRaw("Game data folders contain a group, which must be named.\n" +
-																	 "Enter a name for the group: ", ANSI_GREEN);
+								System.out.println("Congrats! A new game data folder was created at that location.");
+								System.out.print("Game data folders contain a group, which must be named.\n" +
+																	 "Enter a name for the group: ");
 								BKULUtils.createDirectory(LOCAL_CONFIG_PATH);
 								writeToLocalStorage(gameDataPath, "sync-folder.txt");
-							    BKULUtils.writeToFile(userInputScanner.nextLine(), getGDPath("group-name.txt"));
-								BKULUtils.createDirectory(getGDPath("servers"));
+							    BKULUtils.writeToFile(InputGetter.nextLine(), ClientUtils.getUDPath("group-name.txt"));
+								BKULUtils.createDirectory(ClientUtils.getUDPath("servers"));
 								displayNamePrompt();
-								printANSIColorRaw("Your new group doesn't have any servers on it. Create one now? [y]es or [n]o ", ANSI_GREEN);
-								if(userInputScanner.nextLine().equalsIgnoreCase("y")) {
+								System.out.print("Your new group doesn't have any servers on it. Create one now? [y]es or [n]o ");
+								if(InputGetter.nextLine().equalsIgnoreCase("y")) {
 									System.out.print("Please specify a name for the server: ");
-									String serverName = userInputScanner.nextLine();
+									String serverName = InputGetter.nextLine();
 									displayName = getFileFromLocalStorage("display-name.txt");
-									userDataPath = getGDPath("servers" + File.separator + serverName + File.separator + "users"
+									userDataPath = ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users"
 											+ File.separator + displayName);
-									BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName));
-									BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName + File.separator + "users"));
-									BKULUtils.createFile(getLSPath(serverName, "Marketfile"));
-									BKULUtils.writeToFile("Fighter~300", getLSPath(serverName, "Marketfile"));
+									BKULUtils.createDirectory(ClientUtils.getUDPath("servers" + File.separator + serverName));
+									BKULUtils.createDirectory(ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users"));
+									BKULUtils.createFile(ClientUtils.getLSPath(serverName, "Marketfile"));
+									BKULUtils.writeToFile("Fighter~300", ClientUtils.getLSPath(serverName, "Marketfile"));
 									userSetup(serverName);
-									printANSIColor("Server was created successfully!", ANSI_GREEN);
+									System.out.println("Server was created successfully!");
 								}
-								printANSIColor("Setup is done! Exiting.", ANSI_GREEN);
+								System.out.println("Setup is done! Exiting.");
 								System.exit(0);
 							}
 							// if the user says n or anything else, it shows the prompt to enter a sync folder again
@@ -210,19 +258,17 @@ public class BKUL {
 	
 	// declare server related variables
 	private static String currentServer;
-	private static final String USER_DATA_FOLDER = getGDPath("servers" + File.separator + currentServer + File.separator + "users.txt");
+	private static final String USER_DATA_FOLDER = ClientUtils.getUDPath("servers" + File.separator + currentServer + File.separator + "users.txt");
 	public static int gold, xp;
 	public static JTextField goldField;
 	
 	// this method contains the main game loop
 	public static void joinServer(String name) throws Exception {
-		//if(BKULUtils.doesDirectoryExist(getGDPath("servers" + File.separator + currentServer))) {
+		if(BKULUtils.doesDirectoryExist(ClientUtils.getUDPath("servers" + File.separator + name))) {
 		System.out.println("Connecting to server " + name + "...");
 		currentServer = name;
-		userDataPath = getGDPath("servers" + File.separator + currentServer + File.separator + "users"
+		userDataPath = ClientUtils.getUDPath("servers" + File.separator + currentServer + File.separator + "users"
 				+ File.separator + displayName);
-		gold = Integer.parseInt(BKULUtils.readFile(getUDPath("gold.txt")));
-		xp = Integer.parseInt(BKULUtils.readFile(getUDPath("xp.txt")));
 		BufferedReader br;
 		InfiniteBKULRunner infiniRunner = new InfiniteBKULRunner();
 		Thread sessionInfiniteThread = new Thread(infiniRunner);
@@ -231,14 +277,22 @@ public class BKUL {
 		Thread warDetectorRunner = new Thread(declareWarDetector);
 		warDetectorRunner.start();
 		System.out.println("Connected! Switching to console. <h> for help");
-		if(!BKULUtils.doesDirectoryExist(getGDPath("servers" + File.separator + currentServer +
+		if(!BKULUtils.doesDirectoryExist(ClientUtils.getUDPath("servers" + File.separator + currentServer +
 				File.separator + "users" + File.separator + displayName))) {
 			System.out.println("Welcome! You start with:\n"
 					+ "- 500 Gold\n"
 					+ "- A Level 1 Gold Mine to help you get more Gold\n"
+					+ "- A Level 1 Wall to provide basic protection against enemies\n"
 					+ "Here is the help screen to get you started:");
 			printHelp();
 			userSetup(currentServer);
+		}
+		try {
+			gold = Integer.parseInt(BKULUtils.readFile(ClientUtils.getUDPath("gold.txt")));
+			xp = Integer.parseInt(BKULUtils.readFile(ClientUtils.getUDPath("xp.txt")));
+		} catch(Exception e) {
+			System.out.print("There was a problem reading config files in your user folder. Error details:");
+			System.out.print(e.getMessage());
 		}
 		boolean consoleOn = true;
 		String userConsoleInput;
@@ -246,11 +300,13 @@ public class BKUL {
 		// Begin main game loop
 		while(consoleOn) {
 			System.out.print(currentServer + "> ");
-			userConsoleInput = userInputScanner.nextLine();
+			userConsoleInput = InputGetter.nextLine();
 			if(userConsoleInput.equalsIgnoreCase("h")) {
 				printHelp();
 			} else if(userConsoleInput.equalsIgnoreCase("c")) {
-				BKULUtils.clearScreen();
+				bkulConsole.clear();
+				System.out.println("~~Battle Kingdoms: Untold Legends~~\n"
+									 + "Connected to server Sanger");
 			} else if(userConsoleInput.equalsIgnoreCase("q")) {
 				save();
 				System.out.println("Goodbye.");
@@ -260,7 +316,7 @@ public class BKUL {
 				System.out.println("You are: " + displayName);
 				try {
 					int i = 1;
-					File[] files = new File(getLSPath(currentServer, "users")).listFiles();
+					File[] files = new File(ClientUtils.getLSPath(currentServer, "users")).listFiles();
 				    for (File file : files) {
 				        if (file.isDirectory()) {
 				            System.out.println(i + ". " + file.getName());
@@ -268,8 +324,8 @@ public class BKUL {
 				        }
 				    }
 				} catch (Exception e) {
-					printError("Could not list users.");
-					printError(e.getMessage());
+					System.out.print("Could not list users.");
+					System.out.print(e.getMessage());
 				}
 			} else if(userConsoleInput.equalsIgnoreCase("q")) {
 				
@@ -277,12 +333,12 @@ public class BKUL {
 				System.out.print("Disconnecting... ");
 				infiniRunner.stopRunning();
 				save();
-				printANSIColor("Done!", ANSI_GREEN);
+				System.out.println("Done!");
 				consoleOn = false;
 			} else if(userConsoleInput.equalsIgnoreCase("a")) {
 				System.out.println("~~ATTACK!!!~~");
 				System.out.println("Users you can attack:");
-				File[] files = new File(getLSPath(currentServer, "users")).listFiles();
+				File[] files = new File(ClientUtils.getLSPath(currentServer, "users")).listFiles();
 		    	int i = 1;
 			    for (File file : files) {
 			        if (file.isDirectory() && !(file.getName().equals(displayName))) {
@@ -291,31 +347,32 @@ public class BKUL {
 			        }
 			    }
 			    if(i == 1) System.out.println("(none)");
-			    int fightersAmount = BKULUtils.getLengthOfFile(getUDPath("fighters.txt"));
+			    int fightersAmount = BKULUtils.getLengthOfFile(ClientUtils.getUDPath("fighters.txt"));
 			    if(fightersAmount >= 3) {
-			    	printANSIColor("Fighters needed to attack: " + fightersAmount + "/3\n"
-			    						 + "You can fight!", ANSI_GREEN);
+			    	System.out.println("Fighters needed to attack: " + fightersAmount + "/3\n"
+			    						 + "You can fight!");
 			    	System.out.println("Choose a user to attack, or press <q> to quit the menu: ");
-			    	String userToAttack = userInputScanner.nextLine();
+			    	String userToAttack = InputGetter.nextLine();
 			    	if(!userToAttack.equalsIgnoreCase("q")) {
 			    		System.out.println("Declaring war on " + userToAttack + "...");
-			    		String pathToAttackedUser = getLSPath(currentServer, "users" + File.separator + userToAttack + File.separator);
+			    		String pathToAttackedUser = ClientUtils.getLSPath(currentServer, "users" + File.separator + userToAttack + File.separator);
 			    		if(!BKULUtils.doesFileExist(pathToAttackedUser + "warfile.tmp")) {
 			    			BKULUtils.createFile(pathToAttackedUser + "warfile.tmp");
 			    			BKULUtils.writeToFile(displayName, pathToAttackedUser + "warfile.tmp");
+			    			System.out.println("Waiting for other user to accept...");
 			    		} else {
-			    			printError("Temporary file already exists. Perhaps you have already attacked this person?\n"
+			    			System.out.print("Temporary file already exists. Perhaps you have already attacked this person?\n"
 			    						 + "If not, then someone else has already declared war on this user.");
 			    		}
 			    	} else {
 			    		System.out.println("Quitting attack menu...");
 			    	}
 			    } else {
-			    	printError("Fighters needed to attack: " + fightersAmount + "/3");
-			    	printError("Get more Fighters and try again.");
+			    	System.out.print("Fighters needed to attack: " + fightersAmount + "/3");
+			    	System.out.print("Get more Fighters and try again.");
 			    }
 				/*BufferedReader bufread =
-						new BufferedReader(new FileReader(getLSPath(currentServer, "users.txt")));
+						new BufferedReader(new FileReader(ClientUtils.getLSPath(currentServer, "users.txt")));
 				for (String line = bufread.readLine(); line != null; line = bufread.readLine()) {
 					if(!line.equals(displayName)) {
 						System.out.println(line);
@@ -323,21 +380,21 @@ public class BKUL {
 				}*/
 			} else if(userConsoleInput.equalsIgnoreCase("s")) {
 				System.out.println("Structures (press <m> for market):");
-				BufferedReader brForStr = new BufferedReader(new FileReader(getUDPath("structures.txt")));
+				BufferedReader brForStr = new BufferedReader(new FileReader(ClientUtils.getUDPath("structures.txt")));
 				for (String line = brForStr.readLine(); line != null; line = brForStr.readLine()) {
 					String[] parts = line.split("~");
 					System.out.println("A Level " + parts[1] + " " + parts[0]);
 				}
 			} else if(userConsoleInput.equalsIgnoreCase("p")) {
-				printANSIColor("XP: " + BKULUtils.readFile(getUDPath("xp.txt")), ANSI_GREEN);
-				printANSIColor("Gold: " + gold/*BKULUtils.readFile(getUDPath("gold.txt"))*/, ANSI_YELLOW);
+				System.out.println("XP: " + BKULUtils.readFile(ClientUtils.getUDPath("xp.txt")));
+				System.out.println("Gold: " + gold/*BKULUtils.readFile(ClientUtils.getUDPath("gold.txt"))*/);
 			} else if(userConsoleInput.equalsIgnoreCase("updnecfiles")) {
 				userSetup(currentServer);
 			} else if(userConsoleInput.equalsIgnoreCase("e")) {
 				System.out.println("Achievements:");
 				throw new NotImplementedException();
 			} else if(userConsoleInput.equalsIgnoreCase("m")) {
-				BufferedReader brForStr = new BufferedReader(new FileReader(getGDPath("servers" + File.separator +
+				BufferedReader brForStr = new BufferedReader(new FileReader(ClientUtils.getUDPath("servers" + File.separator +
 						currentServer + File.separator + "Marketfile")));
 				System.out.println("~~Market~~");
 				String[] goodPurchases = new String[100];
@@ -349,42 +406,42 @@ public class BKUL {
 					goodPurchases[goodPurchases.length - 1] = parts[0];
 				}
 				System.out.print("Type the name of the item you would like to buy, or <q> to quit: ");
-				String userInputPurchase = userInputScanner.nextLine();
+				String userInputPurchase = InputGetter.nextLine();
 				boolean isPurchaseValid = false;
 				if(!userInputPurchase.equalsIgnoreCase("q")) {
 					for(String purchase : goodPurchases) {
 						if(purchase.equalsIgnoreCase(userInputPurchase)) {
 							int goldPrice = 0;
-							BufferedReader brForStr2 = new BufferedReader(new FileReader(getGDPath("servers" + File.separator +
+							BufferedReader brForStr2 = new BufferedReader(new FileReader(ClientUtils.getUDPath("servers" + File.separator +
 									currentServer + File.separator + "Marketfile")));
 							for (String line = brForStr2.readLine(); line != null; line = brForStr2.readLine()) {
 								String[] parts = line.split("~");
 								if(parts[0].equalsIgnoreCase(userInputPurchase)) {
 									System.out.println(parts[1]);
 									try { goldPrice = Integer.parseInt(parts[1]); } catch(Exception e) {
-										printError("Could not buy this item. Details of error:");
-										printError(e.getMessage());
+										System.out.print("Could not buy this item. Details of error:");
+										System.out.print(e.getMessage());
 									}
 								}
 							}
 							gold = gold - goldPrice;
-							printANSIColor("Your purchase has been made! A " + userInputPurchase + " for "
-													+ goldPrice + " gold.", ANSI_GREEN);
+							System.out.println("Your purchase has been made! A " + userInputPurchase + " for "
+													+ goldPrice + " gold.");
 							if(userInputPurchase.equalsIgnoreCase("Fighter")) {
 								int i = 0;
-								BufferedReader brForStr3 = new BufferedReader(new FileReader(getUDPath("fighters.txt")));
+								BufferedReader brForStr3 = new BufferedReader(new FileReader(ClientUtils.getUDPath("fighters.txt")));
 								for (String line = brForStr3.readLine(); line != null; line = brForStr3.readLine()) {
 									i++;
 								}
 								String fightersName = BKULUtils.randomFighterName();
-								BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1", getUDPath("fighters.txt"));
-								printANSIColor("You have a new Fighter, " + fightersName + "! Welcome " +
-														fightersName + " to the team!", ANSI_GREEN);
+								BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1", ClientUtils.getUDPath("fighters.txt"));
+								System.out.println("You have a new Fighter, " + fightersName + "! Welcome " +
+														fightersName + " to the team!");
 							}
 							isPurchaseValid = true;
 						}
 					}
-					if(!isPurchaseValid) printError("Purchase invalid");
+					if(!isPurchaseValid) System.out.print("Purchase invalid");
 				} else {
 					System.out.println("Exiting market...");
 				}
@@ -407,18 +464,18 @@ public class BKUL {
 				System.out.println("~~Alliance Menu~~");
 				System.out.println("You are allied with:");
 			} else {
-				printError("Command not found. Type <h> for a list of commands.");
+				System.out.print("Command not found. Type <h> for a list of commands.");
 			}
 		}
-		/*} else {
-			printError("That server does not exist. Please enter another.");
-		}*/
+		} else {
+			System.out.print("That server does not exist. Please enter another.");
+		}
 	}
 	
 	
 	public static BoolIntOutcome hasGoldMine() {
 		try {
-			BufferedReader brForStr = new BufferedReader(new FileReader(getUDPath("structures.txt")));
+			BufferedReader brForStr = new BufferedReader(new FileReader(ClientUtils.getUDPath("structures.txt")));
 			for (String line = brForStr.readLine(); line != null;) {
 				String[] parts = line.split("~");
 				if(parts[0].equals("Gold Mine")) {
@@ -434,22 +491,37 @@ public class BKUL {
 	}
 	// method to crate directory structure for user data folder
 	public static void userSetup(String serverName) {
-		if(!BKULUtils.doesDirectoryExist(getGDPath("servers" + File.separator +
+		if(!BKULUtils.doesDirectoryExist(ClientUtils.getUDPath("servers" + File.separator +
 															       serverName + File.separator + "users"))) {
-			BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName + File.separator + "users"));
+			BKULUtils.createDirectory(ClientUtils.getUDPath("servers" + File.separator + serverName + File.separator + "users"));
 		}
 		BKULUtils.createDirectory(userDataPath);
-		BKULUtils.createFile(getUDPath("structures.txt"));
-		BKULUtils.writeToFile("Gold Mine~1\nWall~1", getUDPath("structures.txt"));
-		BKULUtils.createFile(getUDPath("gold.txt"));
-		BKULUtils.writeToFile("500", getUDPath("gold.txt"));
-		BKULUtils.createFile(getUDPath("xp.txt"));
-		BKULUtils.writeToFile("0", getUDPath("xp.txt"));
-		BKULUtils.createFile(getUDPath("wall-health.txt"));
-		BKULUtils.writeToFile("250", getUDPath("wall-health.txt"));
-		BKULUtils.createFile(getUDPath("achievements.txt"));
-		BKULUtils.createFile(getUDPath("fighters.txt"));
-		//BKULUtils.writeToFile("", getUDPath("achievements.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("structures.txt"));
+		BKULUtils.writeToFile("Gold Mine~1\nWall~1", ClientUtils.getUDPath("structures.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("gold.txt"));
+		BKULUtils.writeToFile("500", ClientUtils.getUDPath("gold.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("xp.txt"));
+		BKULUtils.writeToFile("0", ClientUtils.getUDPath("xp.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("wall-health.txt"));
+		BKULUtils.writeToFile("250", ClientUtils.getUDPath("wall-health.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("achievements.txt"));
+		BKULUtils.createFile(ClientUtils.getUDPath("fighters.txt"));
+		//BKULUtils.writeToFile("", ClientUtils.getUDPath("achievements.txt"));
+	}
+	
+	public static void options() {
+		System.out.println("~~Options~~\n"
+									+ "(1) Sync folder\n"
+									+ "(2) Delete local configuration folder");
+		System.out.print("Choose one (letter or number), or <q> to quit: ");
+		String option = InputGetter.nextLine();
+		if(equalsICTwo(option, "1", "Sync folder")) {
+			
+		}
+	}
+	
+	public static boolean equalsICTwo(String string, String integer, String secondString) {
+		return(string.equalsIgnoreCase(secondString) || string.equalsIgnoreCase(integer));
 	}
 	
 	public static void printHelp() {
@@ -457,10 +529,12 @@ public class BKUL {
 				"h - Display this screen\n" +
 				"c - Clear screen\n" +
 				"d - Disconnect and go back to lobby\n" +
-				"u - List all users on the server\n" + 
+				"u - List all users on the server\n" +
+				"a - Attack other players! (BETA)\n" +
 				"s - List all structures you own\n" +
+				"m - Open market\n" +
 				"p - List your progress - xp, coins, & more\n" +
-				"l - Open alliance menu (BETA)" +
+				"l - Open alliance menu (NOT WORKING)\n" +
 				"o - Options\n" +
 				"q - Quit");
 	}
@@ -468,37 +542,13 @@ public class BKUL {
 	public static void save() {
 		System.out.print("Saving config files... ");
 		try {
-			BKULUtils.writeToFile(String.valueOf(gold), getUDPath("gold.txt"));
-			BKULUtils.writeToFile(String.valueOf(xp), getUDPath("xp.txt"));
+			BKULUtils.writeToFile(String.valueOf(gold), ClientUtils.getUDPath("gold.txt"));
+			BKULUtils.writeToFile(String.valueOf(xp), ClientUtils.getUDPath("xp.txt"));
 		} catch(Exception e) {
-			printErrorRaw("Error. Details:\n" + e.getMessage());
+			System.out.print("Error. Details:\n" + e.getMessage());
 		}
-		printANSIColorRaw("Done!\n", ANSI_GREEN);
+		System.out.print("Done!\n");
 	}
-	// declare ansi escape codes for terminal colors
-	public static final String ANSI_RESET = "\u001B[0m";
-	public static final String ANSI_BLACK = "\u001B[30m";
-	public static final String ANSI_RED = "\u001B[31m";
-	public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_YELLOW = "\u001B[33m";
-	public static final String ANSI_BLUE = "\u001B[34m";
-	public static final String ANSI_PURPLE = "\u001B[35m";
-	public static final String ANSI_CYAN = "\u001B[36m";
-	public static final String ANSI_WHITE = "\u001B[37m";
-	
-	// method to simplify the printing of colored text using ANSI escape codes
-	public static void printANSIColorRaw(String textToPrint, String escapeCode) {
-		if(BKULUtils.isWindows()/* || BKULUtils.isIDE()*/) {
-			System.out.print(textToPrint);
-		} else {
-			System.out.print(escapeCode + textToPrint + ANSI_RESET);
-		}
-	}
-	
-	// 
-	public static void printANSIColor(String textToPrint, String escapeCode) { printANSIColorRaw(textToPrint + "\n", escapeCode); }
-	public static void printError(String textToPrint) { printErrorRaw(textToPrint + "\n"); }
-	public static void printErrorRaw(String textToPrint) { printANSIColorRaw(textToPrint, ANSI_RED); }
 	
 	public static String getLocalStoragePath(String fileName) { return LOCAL_CONFIG_PATH + File.separator + fileName; }
 	
@@ -507,20 +557,20 @@ public class BKUL {
 		try {
 			return BKULUtils.readFile(LOCAL_CONFIG_PATH + File.separator + fileName);
 		} catch (Exception e) {
-			printErrorRaw("There was a problem reading this local configuration file: " + fileName + ".\nError details: " + e.getMessage() + "\n"
+			System.out.print("There was a problem reading this local configuration file: " + fileName + ".\nError details: " + e.getMessage() + "\n"
 								+ "If you've tampered with the file, re-create it: " + fileName + ".\n"
 								+	"Would you like to delete the local-config folder? WARNING: This will delete display name and sync folder info.\n"
 								+ "[y]es or [n]o ");
-			if(userInputScanner.nextLine().equalsIgnoreCase("y")) {
-				printErrorRaw("Deleting the config folder " + LOCAL_CONFIG_PATH + ", press <enter> to continue or s to stop... ");
-				if(!userInputScanner.nextLine().equalsIgnoreCase("s")) {
+			if(InputGetter.nextLine().equalsIgnoreCase("y")) {
+				System.out.print("Deleting the config folder " + LOCAL_CONFIG_PATH + ", press <enter> to continue or s to stop... ");
+				if(!InputGetter.nextLine().equalsIgnoreCase("s")) {
 					BKULUtils.deleteFileOrDirectory(LOCAL_CONFIG_PATH);
-				    printANSIColor("The config folder " + LOCAL_CONFIG_PATH + " has been successfully deleted.", ANSI_GREEN);
+				    System.out.println("The config folder " + LOCAL_CONFIG_PATH + " has been successfully deleted.");
 				} else {
-					printANSIColor("The folder was not deleted.", ANSI_GREEN);
+					System.out.println("The folder was not deleted.");
 				}
 			} else {
-				printANSIColor("The folder was not deleted.", ANSI_GREEN);
+				System.out.println("The folder was not deleted.");
 			}
 			System.exit(1);
 		}
@@ -540,13 +590,9 @@ public class BKUL {
 	}
 	public static void displayNamePrompt() {
 		System.out.print("You need to choose a display name to play. Please enter a display name to use: ");
-		writeToLocalStorage(userInputScanner.nextLine(), "display-name.txt");
+		writeToLocalStorage(InputGetter.nextLine(), "display-name.txt");
 	}
-	public static String getGDPath(String fileOrDir) { return gameDataPath + File.separator + fileOrDir; }
-	public static String getUDPath(String fileOrDir) { return userDataPath + File.separator + fileOrDir; }
-	public static String getLSPath(String server, String fileOrDir) {
-		return getGDPath("servers" + File.separator + server + File.separator + fileOrDir);
-	}
+
 }
 class InfiniteBKULRunner implements Runnable {
 	
@@ -567,14 +613,14 @@ class InfiniteBKULRunner implements Runnable {
 				recursiveCounter = 0;
 				recCounterOver = true;
 			}
-			BoolIntOutcome hasGM = BKUL.hasGoldMine();
+			BoolIntOutcome hasGM = BKULCustomConsole.hasGoldMine();
 			if(hasGM.bool) {
 				if(hasGM.integer == 1 && recCounterOver == true) {
-					BKUL.gold++;
+					BKULCustomConsole.gold++;
 					boolean doesGoldFieldExist = false;
-					try { BKUL.goldField.setText("test"); doesGoldFieldExist = true; } catch(Exception e) {}
+					try { BKULCustomConsole.goldField.setText("test"); doesGoldFieldExist = true; } catch(Exception e) {}
 					if(doesGoldFieldExist) {
-						BKUL.goldField.setText(String.valueOf(BKUL.gold) + " gold");
+						BKULCustomConsole.goldField.setText(String.valueOf(BKULCustomConsole.gold) + " gold");
 					}
 					recCounterOver = false;
 				}
@@ -606,12 +652,12 @@ class TempFileChecker implements Runnable {
 	public void run() {
 		while(isRunning) {
 			try {
-				if(BKULUtils.doesFileExist(BKUL.getUDPath("warfile.tmp"))) {
-					BKUL.printError("\n" + BKULUtils.readFile(BKUL.getUDPath("warfile.tmp")) + " has declared war on you!");
-					BKULUtils.deleteFileOrDirectory(BKUL.getUDPath("warfile.tmp"));
+				if(BKULUtils.doesFileExist(ClientUtils.getUDPath("warfile.tmp"))) {
+					System.out.print("\n" + BKULUtils.readFile(ClientUtils.getUDPath("warfile.tmp")) + " has declared war on you!");
+					BKULUtils.deleteFileOrDirectory(ClientUtils.getUDPath("warfile.tmp"));
 					System.out.print(nameOfServer + "> ");
 				}
-				Thread.sleep(150);
+				Thread.sleep(250);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
