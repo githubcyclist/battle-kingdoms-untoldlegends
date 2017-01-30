@@ -1,14 +1,12 @@
 # Battle Kingdoms: Untold Legends
 A simple text-based RPG written in Java which uses file syncing software to function.
 
-This means all computers that are playing together have to be running the same file syncing software linked to the same account.
+This means all computers that are playing together have to be running the same file syncing software linked to the same account, or if you're playing with friends, shared folders (if applicable).
 
 Some examples of file syncing software:
 - Dropbox
 - Google Drive
 - Box
-
-Remember, if you are playing with friends who already use your file syncing software of choice, shared folders can be used.
 
 ## How to set up the game
 
@@ -43,7 +41,7 @@ Open a command prompt or terminal and run the command: "java -jar bkul-customcon
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-5. Make sure you create or join a group which is in a folder that is being synced to other computers.
+N.B.: Make sure you create or join a group which is in a folder that is being synced to other computers.
 
 ## How to develop the game
 
