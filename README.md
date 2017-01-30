@@ -30,15 +30,16 @@ Terminal-based
 
 JFrame-based
 - Based on the JFrame and a text box, so there is a custom title
-- Uses 100% cross-platform compatible console clearing
-- More buggy
-- Text in console is eraseable...
+- Uses 100% cross-platform "console" clearing
+- Has more bugs, e.g. text in "console" is eraseable...
 
 ### Instructions for the terminal-based version
 4. Open a command prompt or terminal and run the command: "java -jar bkul-text-(latest version).jar"
 
 ### Instructions for the JFrame-based version
 4. On most systems, you can just double-click the jar file.
+
+------------------------------------------------------------------------------------------------------------------------------
 
 5. Make sure you create or join a group which is in a folder that is being synced to other computers.
 
