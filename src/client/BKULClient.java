@@ -42,11 +42,11 @@ public class BKULClient {
 	
 	// this method contains the main game loop
 	public void joinServer(String name) throws Exception {
-		if(BKULUtils.doesDirectoryExist(ClientUtils.getGDPath("servers" + File.separator + name))) {
+		if(BKULUtils.doesDirectoryExist(ClientUtils.getGDPath("servers" + File.separator + name, gameDataPath))) {
 			System.out.println("Connecting to server " + name + "...");
 			currentServer = name;
 			userDataPath = ClientUtils.getGDPath("servers" + File.separator + currentServer + File.separator + "users"
-					+ File.separator + displayName);
+					+ File.separator + displayName, gameDataPath);
 			BufferedReader br;
 			InfiniteBKULRun infiniRunner = new InfiniteBKULRun(this);
 			Thread sessionInfiniteThread = new Thread((Runnable) infiniRunner);
@@ -56,7 +56,7 @@ public class BKULClient {
 			warDetectorRunner.start();
 			System.out.println("Connected! Switching to console. <h> for help");
 			if(!BKULUtils.doesDirectoryExist(ClientUtils.getGDPath("servers" + File.separator + currentServer +
-					File.separator + "users" + File.separator + displayName))) {
+					File.separator + "users" + File.separator + displayName, gameDataPath))) {
 				System.out.println("Welcome! You start with:\n"
 						+ "- 500 Gold\n"
 						+ "- A Level 1 Gold Mine to help you get more Gold\n"
@@ -66,8 +66,8 @@ public class BKULClient {
 				ClientUtils.userSetup(currentServer);
 			}
 			try {
-				gold = Integer.parseInt(BKULUtils.readFile(ClientUtils.getUDPath("gold.txt")));
-				xp = Integer.parseInt(BKULUtils.readFile(ClientUtils.getUDPath("xp.txt")));
+				gold = Integer.parseInt(BKULUtils.readFile(getUDPath("gold.txt")));
+				xp = Integer.parseInt(BKULUtils.readFile(getUDPath("xp.txt")));
 			} catch(Exception e) {
 				System.out.print("There was a problem reading config files in your user folder. Error details:");
 				System.out.print(e.getMessage());
@@ -94,7 +94,7 @@ public class BKULClient {
 					System.out.println("You are: " + displayName);
 					try {
 						int i = 1;
-						File[] files = new File(ClientUtils.getLSPath(currentServer, "users")).listFiles();
+						File[] files = new File(getLSPath(currentServer, "users")).listFiles();
 					    for (File file : files) {
 					        if (file.isDirectory()) {
 					            System.out.println(i + ". " + file.getName());
@@ -116,7 +116,7 @@ public class BKULClient {
 				} else if(userConsoleInput.equalsIgnoreCase("a")) {
 					System.out.println("~~ATTACK!!!~~");
 					System.out.println("Users you can attack:");
-					File[] files = new File(ClientUtils.getLSPath(currentServer, "users")).listFiles();
+					File[] files = new File(getLSPath(currentServer, "users")).listFiles();
 			    	int i = 1;
 				    for (File file : files) {
 				        if (file.isDirectory() && !(file.getName().equals(displayName))) {
@@ -125,7 +125,7 @@ public class BKULClient {
 				        }
 				    }
 				    if(i == 1) System.out.println("(none)");
-				    int fightersAmount = BKULUtils.getLengthOfFile(ClientUtils.getUDPath("fighters.txt"));
+				    int fightersAmount = BKULUtils.getLengthOfFile(getUDPath("fighters.txt"));
 				    if(fightersAmount >= 3) {
 				    	System.out.println("Fighters needed to attack: " + fightersAmount + "/3\n"
 				    						 + "You can fight!");
@@ -133,13 +133,13 @@ public class BKULClient {
 				    	String userToAttack = UserInputGet.nextLine();
 				    	if(!userToAttack.equalsIgnoreCase("q")) {
 				    		System.out.println("Declaring war on " + userToAttack + "...");
-				    		String pathToAttackedUser = ClientUtils.getLSPath(currentServer, "users" + File.separator + userToAttack + File.separator);
+				    		String pathToAttackedUser = getLSPath(currentServer, "users" + File.separator + userToAttack + File.separator);
 				    		if(!BKULUtils.doesFileExist(pathToAttackedUser + "warfile.tmp")) {
 				    			BKULUtils.createFile(pathToAttackedUser + "warfile.tmp");
 				    			BKULUtils.writeToFile(displayName, pathToAttackedUser + "warfile.tmp");
 				    			System.out.println("Waiting for other user to accept...");
 				    		} else {
-				    			System.out.print("Temporary file already exists. Perhaps you have already attacked this person?\n"
+				    			System.out.println("Temporary file already exists. Perhaps you have already attacked this person?\n"
 				    						 + "If not, then someone else has already declared war on this user.");
 				    		}
 				    	} else {
@@ -150,7 +150,7 @@ public class BKULClient {
 				    	System.out.print("Get more Fighters and try again.");
 				    }
 					/*BufferedReader bufread =
-							new BufferedReader(new FileReader(ClientUtils.getUDPath(currentServer, "users.txt")));
+							new BufferedReader(new FileReader(getUDPath(currentServer, "users.txt")));
 					for (String line = bufread.readLine(); line != null; line = bufread.readLine()) {
 						if(!line.equals(displayName)) {
 							System.out.println(line);
@@ -158,14 +158,14 @@ public class BKULClient {
 					}*/
 				} else if(userConsoleInput.equalsIgnoreCase("s")) {
 					System.out.println("Structures (press <m> for market):");
-					BufferedReader brForStr = new BufferedReader(new FileReader(ClientUtils.getUDPath("structures.txt")));
+					BufferedReader brForStr = new BufferedReader(new FileReader(getUDPath("structures.txt")));
 					for (String line = brForStr.readLine(); line != null; line = brForStr.readLine()) {
 						String[] parts = line.split("~");
 						System.out.println("A Level " + parts[1] + " " + parts[0]);
 					}
 				} else if(userConsoleInput.equalsIgnoreCase("p")) {
-					System.out.println("XP: " + BKULUtils.readFile(ClientUtils.getUDPath("xp.txt")));
-					System.out.println("Gold: " + gold/*BKULUtils.readFile(ClientUtils.getUDPath("gold.txt"))*/);
+					System.out.println("XP: " + BKULUtils.readFile(getUDPath("xp.txt")));
+					System.out.println("Gold: " + gold/*BKULUtils.readFile(getUDPath("gold.txt"))*/);
 				} else if(userConsoleInput.equalsIgnoreCase("updnecfiles")) {
 					ClientUtils.userSetup(currentServer);
 				} else if(userConsoleInput.equalsIgnoreCase("e")) {
@@ -173,7 +173,7 @@ public class BKULClient {
 					throw new NotImplementedException();
 				} else if(userConsoleInput.equalsIgnoreCase("m")) {
 					BufferedReader brForStr = new BufferedReader(new FileReader(ClientUtils.getGDPath("servers" + File.separator +
-							currentServer + File.separator + "Marketfile")));
+							currentServer + File.separator + "Marketfile", gameDataPath)));
 					System.out.println("~~Market~~");
 					String[] goodPurchases = new String[100];
 					String[][] goodPurchases2;
@@ -191,7 +191,7 @@ public class BKULClient {
 							if(purchase.equalsIgnoreCase(userInputPurchase)) {
 								int goldPrice = 0;
 								BufferedReader brForStr2 = new BufferedReader(new FileReader(ClientUtils.getGDPath("servers" + File.separator +
-										currentServer + File.separator + "Marketfile")));
+										currentServer + File.separator + "Marketfile", gameDataPath)));
 								for (String line = brForStr2.readLine(); line != null; line = brForStr2.readLine()) {
 									String[] parts = line.split("~");
 									if(parts[0].equalsIgnoreCase(userInputPurchase)) {
@@ -207,12 +207,12 @@ public class BKULClient {
 														+ goldPrice + " gold.");
 								if(userInputPurchase.equalsIgnoreCase("Fighter")) {
 									int i = 0;
-									BufferedReader brForStr3 = new BufferedReader(new FileReader(ClientUtils.getUDPath("fighters.txt")));
+									BufferedReader brForStr3 = new BufferedReader(new FileReader(getUDPath("fighters.txt")));
 									for (String line = brForStr3.readLine(); line != null; line = brForStr3.readLine()) {
 										i++;
 									}
 									String fightersName = BKULUtils.randomFighterName();
-									BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1", ClientUtils.getUDPath("fighters.txt"));
+									BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1", getUDPath("fighters.txt"));
 									System.out.println("You have a new Fighter, " + fightersName + "! Welcome " +
 															fightersName + " to the team!");
 								}
@@ -249,6 +249,15 @@ public class BKULClient {
 				System.out.print("That server does not exist. Please enter another.");
 			}
 		}
+	public static String getGDPath(String fileOrDir) { return gameDataPath + File.separator + fileOrDir; }
 	
-		
+	public static String getUDPath(String fileOrDir) { return userDataPath + File.separator + fileOrDir; }
+	
+	public static String getLSPath(String server, String fileOrDir) {
+		return getGDPath("servers" + File.separator + server + File.separator + fileOrDir);
+	}
+	
+	public static String getOUPath(String otherUser, String serverName, String fileOrDir) {
+		return getGDPath("servers" + File.separator + serverName + File.separator + "users" + File.separator + otherUser);
+	}
 }

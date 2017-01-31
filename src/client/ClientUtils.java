@@ -16,16 +16,16 @@ public class ClientUtils {
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
 	
-	public static String getGDPath(String fileOrDir) { return BKULClient.gameDataPath + File.separator + fileOrDir; }
+	public static String getGDPath(String fileOrDir, String gdPath) { return gdPath + File.separator + fileOrDir; }
 	
-	public static String getUDPath(String fileOrDir) { return BKULClient.userDataPath + File.separator + fileOrDir; }
+	public static String getUDPath(String fileOrDir, String gdPath) { return BKULClient.userDataPath + File.separator + fileOrDir; }
 	
-	public static String getLSPath(String server, String fileOrDir) {
-		return getGDPath("servers" + File.separator + server + File.separator + fileOrDir);
+	public static String getLSPath(String server, String fileOrDir, String gdPath) {
+		return getGDPath("servers" + File.separator + server + File.separator + fileOrDir, gdPath);
 	}
 	
-	public static String getOUPath(String otherUser, String serverName, String fileOrDir) {
-		return getGDPath("servers" + File.separator + serverName + File.separator + "users" + File.separator + otherUser);
+	public static String getOUPath(String otherUser, String serverName, String fileOrDir, String gdPath) {
+		return getGDPath("servers" + File.separator + serverName + File.separator + "users" + File.separator + otherUser, gdPath);
 	}
 	
 	public static void printHelp() {
@@ -46,8 +46,8 @@ public class ClientUtils {
 	public static void save() {
 		System.out.print("Saving config files... ");
 		try {
-			BKULUtils.writeToFile(String.valueOf(BKULClient.gold), getUDPath("gold.txt"));
-			BKULUtils.writeToFile(String.valueOf(BKULClient.xp), getUDPath("xp.txt"));
+			BKULUtils.writeToFile(String.valueOf(BKULClient.gold), getUDPath("gold.txt", BKULClient.gameDataPath));
+			BKULUtils.writeToFile(String.valueOf(BKULClient.xp), getUDPath("xp.txt", BKULClient.gameDataPath));
 		} catch(Exception e) {
 			System.out.print("Error. Details:\n" + e.getMessage());
 		}
@@ -71,20 +71,21 @@ public class ClientUtils {
 	// method to crate directory structure for user data folder
 	public static void userSetup(String serverName) {
 		if(!BKULUtils.doesDirectoryExist(getGDPath("servers" + File.separator +
-															       serverName + File.separator + "users"))) {
-			BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName + File.separator + "users"));
+															       serverName + File.separator + "users", BKULClient.gameDataPath))) {
+			BKULUtils.createDirectory(getGDPath("servers" + File.separator + serverName + File.separator + "users",
+					BKULClient.gameDataPath));
 		}
 		BKULUtils.createDirectory(BKULClient.userDataPath);
-		BKULUtils.createFile(getUDPath("structures.txt"));
-		BKULUtils.writeToFile("Gold Mine~1\nWall~1", getUDPath("structures.txt"));
-		BKULUtils.createFile(getUDPath("gold.txt"));
-		BKULUtils.writeToFile("500", getUDPath("gold.txt"));
-		BKULUtils.createFile(getUDPath("xp.txt"));
-		BKULUtils.writeToFile("0", getUDPath("xp.txt"));
-		BKULUtils.createFile(getUDPath("wall-health.txt"));
-		BKULUtils.writeToFile("250", getUDPath("wall-health.txt"));
-		BKULUtils.createFile(getUDPath("achievements.txt"));
-		BKULUtils.createFile(getUDPath("fighters.txt"));
+		BKULUtils.createFile(getUDPath("structures.txt", BKULClient.gameDataPath));
+		BKULUtils.writeToFile("Gold Mine~1\nWall~1", getUDPath("structures.txt", BKULClient.gameDataPath));
+		BKULUtils.createFile(getUDPath("gold.txt", BKULClient.gameDataPath));
+		BKULUtils.writeToFile("500", getUDPath("gold.txt", BKULClient.gameDataPath));
+		BKULUtils.createFile(getUDPath("xp.txt", BKULClient.gameDataPath));
+		BKULUtils.writeToFile("0", getUDPath("xp.txt", BKULClient.gameDataPath));
+		BKULUtils.createFile(getUDPath("wall-health.txt", BKULClient.gameDataPath));
+		BKULUtils.writeToFile("250", getUDPath("wall-health.txt", BKULClient.gameDataPath));
+		BKULUtils.createFile(getUDPath("achievements.txt", BKULClient.gameDataPath));
+		BKULUtils.createFile(getUDPath("fighters.txt", BKULClient.gameDataPath));
 		//BKULUtils.writeToFile("", getUDPath("achievements.txt"));
 	}
 }
