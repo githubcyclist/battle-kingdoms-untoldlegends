@@ -1,6 +1,7 @@
 package client;
 
 import game.BKULText;
+import menu.InputGetter;
 import util.BKULUtils;
 
 public class TempChecker implements Runnable {
@@ -18,8 +19,12 @@ public class TempChecker implements Runnable {
 		while(isRunning) {
 			try {
 				if(BKULUtils.doesFileExist(BKULText.getUDPath("warfile.tmp"))) {
-					System.out.print("\n" + BKULUtils.readFile(BKULText.getUDPath("warfile.tmp")) + " has declared war on you!");
-					BKULUtils.deleteFileOrDirectory(BKULText.getUDPath("warfile.tmp"));
+					System.out.print("\n" + BKULUtils.readFile(BKULClient.getUDPath("warfile.tmp")) + " has declared war on you!");
+					BKULUtils.deleteFileOrDirectory(BKULClient.getUDPath("warfile.tmp"));
+					System.out.print("Join fight? [y]es or [n]o ");
+					if(InputGetter.nextLine().equalsIgnoreCase("y")) {
+						BKULClient.attack(BKULUtils.readFile(BKULClient.getUDPath("warfile.tmp")));
+					}
 					System.out.print(nameOfServer + "> ");
 				}
 				Thread.sleep(250);

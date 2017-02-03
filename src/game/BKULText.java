@@ -25,6 +25,7 @@ public class BKULText {
 	
 	// main method, contains setup logic and game startup console
 	public static void main(String[] args) throws Exception {
+		BKULUtils.clearScreen();
 		printANSIColor("~~Battle Kingdoms: Untold Legends~~", ANSI_CYAN);
 		if(BKULUtils.doesDirectoryExist(LOCAL_CONFIG_PATH)) {
 			displayName = getFileFromLocalStorage("display-name.txt");

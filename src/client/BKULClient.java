@@ -3,6 +3,7 @@ package client;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -137,7 +138,19 @@ public class BKULClient {
 				    		if(!BKULUtils.doesFileExist(pathToAttackedUser + "warfile.tmp")) {
 				    			BKULUtils.createFile(pathToAttackedUser + "warfile.tmp");
 				    			BKULUtils.writeToFile(displayName, pathToAttackedUser + "warfile.tmp");
-				    			System.out.println("Waiting for other user to accept...");
+				    			System.out.println("Waiting for other user to accept... (" + getUDPath("acceptfile.tmp") + ")");
+				    			AttackChecker acceptCheck = new AttackChecker(getUDPath("acceptfile.tmp"));
+				    			Thread sessionCheckThread = new Thread(acceptCheck);
+				    			sessionCheckThread.start();
+				    			sessionCheckThread.join();
+				    			if(BKULUtils.readFile(getUDPath("acceptfile.tmp")).equals(userToAttack)) {
+				    				BKULUtils.deleteFileOrDirectory(getUDPath("acceptfile.tmp"));
+					    			System.out.println("User has accepted! Beginning fight...");
+				    			} else if(BKULUtils.readFile(getUDPath("acceptfile.tmp")).equals(userToAttack + "~decline")){
+				    				System.out.println("User has declined.");
+				    			} else {
+				    				System.out.println("Encountered stray acceptfile.");
+				    			}
 				    		} else {
 				    			System.out.println("Temporary file already exists. Perhaps you have already attacked this person?\n"
 				    						 + "If not, then someone else has already declared war on this user.");
@@ -212,7 +225,7 @@ public class BKULClient {
 										i++;
 									}
 									String fightersName = BKULUtils.randomFighterName();
-									BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1", getUDPath("fighters.txt"));
+									BKULUtils.appendFileNewLn(i+1 + "~" + fightersName + "~1~10", getUDPath("fighters.txt"));
 									System.out.println("You have a new Fighter, " + fightersName + "! Welcome " +
 															fightersName + " to the team!");
 								}
@@ -242,22 +255,35 @@ public class BKULClient {
 					System.out.println("~~Alliance Menu~~");
 					System.out.println("You are allied with:");
 				} else {
-					System.out.print("Command not found. Type <h> for a list of commands.");
+					System.out.println("Command not found. Type <h> for a list of commands.");
 				}
 			}
 			} else {
 				System.out.print("That server does not exist. Please enter another.");
 			}
 		}
-	public static String getGDPath(String fileOrDir) { return gameDataPath + File.separator + fileOrDir; }
+		public static String getGDPath(String fileOrDir) { return gameDataPath + File.separator + fileOrDir; }
 	
-	public static String getUDPath(String fileOrDir) { return userDataPath + File.separator + fileOrDir; }
+		public static String getUDPath(String fileOrDir) { return userDataPath + File.separator + fileOrDir; }
 	
-	public static String getLSPath(String server, String fileOrDir) {
-		return getGDPath("servers" + File.separator + server + File.separator + fileOrDir);
-	}
+		public static String getLSPath(String server, String fileOrDir) {
+			return getGDPath("servers" + File.separator + server + File.separator + fileOrDir);
+		}
 	
-	public static String getOUPath(String otherUser, String serverName, String fileOrDir) {
-		return getGDPath("servers" + File.separator + serverName + File.separator + "users" + File.separator + otherUser);
-	}
+		public static String getOUPath(String otherUser, String serverName, String fileOrDir) {
+			return getGDPath("servers" + File.separator + serverName + File.separator + "users" + File.separator + otherUser);
+		}
+		public static void attack(String opponent) throws IOException {
+			System.out.println("Beginning fight with " + opponent + "...");
+			BKULUtils.createFile(getUDPath("yourturn.tmp"));
+			System.out.println("~~Fighters you can Use~~");
+			BufferedReader brForStr = new BufferedReader(new FileReader(getUDPath("fighters.txt")));
+			for (String line = brForStr.readLine(); line != null; line = brForStr.readLine()) {
+				System.out.println(line);
+			}
+			System.out.print("Choose a fighter to use, or <s> to skip turn: ");
+			if(!UserInputGet.nextLine().equalsIgnoreCase("s")) {
+				
+			}
+		}
 }
