@@ -2,4 +2,8 @@ bin/local-config
 bin/local-config/*
 local-config
 local-config/*
-/bin/
+workspace
+workspace/*
+bin/workspace
+bin/workspace/*
+

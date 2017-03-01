@@ -2,8 +2,6 @@ package menu;
 
 import java.util.Scanner;
 
-import menu.Menu.MenuItem;
-
 public class InputGetter {
 	public static String nextLine() {
 		String choosen = "";

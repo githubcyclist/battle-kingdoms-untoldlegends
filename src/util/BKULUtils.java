@@ -1,10 +1,6 @@
 package util;
 
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.event.KeyEvent;
 import java.io.*;
-import java.nio.*;
 import java.nio.file.*;
 import java.util.Random;
 import java.util.Scanner;

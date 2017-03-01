@@ -1,16 +1,9 @@
 package game;
 
-import java.awt.Font;
 import java.io.*;
-import java.nio.file.*;
-import java.util.Arrays;
 import java.util.Scanner;
 
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-
 import client.BKULClient;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BKULUtils;
 import util.BoolIntOutcome;
 
@@ -217,7 +210,7 @@ public class BKULText {
 	
 	public static BoolIntOutcome hasGoldMine() {
 		try {
-			BufferedReader brForStr = new BufferedReader(new FileReader(getUDPath("structures.txt")));
+			BufferedReader brForStr = new BufferedReader(new FileReader(BKULClient.getUDPath("structures.txt")));
 			for (String line = brForStr.readLine(); line != null;) {
 				String[] parts = line.split("~");
 				if(parts[0].equals("Gold Mine")) {
