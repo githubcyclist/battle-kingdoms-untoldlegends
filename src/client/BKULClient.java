@@ -338,7 +338,7 @@ public class BKULClient {
 									System.out.println("Add your code inside public void join, in Main.java in your workspace.");
 									devConsole();
 								} else {
-									System.out.println("Invalid command. Enter either a or b (non-case-sensitive).");
+									System.out.println("Invalid command. Enter either a or b (not case-sensitive).");
 								}
 							} else {
 								System.out.println("Command not found. Type <h> for a list of commands.");
